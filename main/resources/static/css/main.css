@@ -1,0 +1,53 @@
+.repo-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.card {
+    border: 1px solid #ccc;
+    padding: 20px;
+    position: relative;
+}
+
+.card:hover::after {
+    content: attr(data-url);
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+
+.diff-view {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.red-diff {
+    background: #ffe6e6;
+}
+
+.green-diff {
+    background: #e6ffe6;
+}
+.pagination a,
+.pagination span {
+    margin: 0 5px;
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+.pagination .active {
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination .disabled {
+    color: #aaa;
+    border: 1px solid #eee;
+    padding: 6px 12px;
+}
