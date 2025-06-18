@@ -31,6 +31,8 @@ public class SVNService {
     @PostConstruct
     public void init() throws SVNException {
         // Add initial repositories
+        repositories.clear();
+        repoList.clear();
          List<SvnRepository> svnRepositoryList = svnRepo.findAll();
          for(SvnRepository svnRepository : svnRepositoryList){
              addRepository(new Repository(svnRepository.getRepo_name(), svnRepository.getRepo_url(), svnRepository.getUsername(), svnRepository.getPassword()));

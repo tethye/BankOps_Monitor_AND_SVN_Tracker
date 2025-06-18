@@ -101,6 +101,7 @@ function renderTree(items) {
                     if (resp.ok) {
                         alert('Repository saved!');
                         closeModal();
+                        location.reload();
                     } else {
                         alert('Error saving repository');
                     }
@@ -111,5 +112,21 @@ function renderTree(items) {
 
     function closeModal() {
     document.getElementById('repoModal').style.display = 'none';
-        location.reload();
+
 }
+function deleteRepository(element) {
+    const name = element.getAttribute("data-repo-name");
+    if (confirm("Are you sure you want to delete?")) {
+        fetch('/svn-dashboard/deleteRepo/' + encodeURIComponent(name), {
+            method: 'GET'
+        }).then(resp => {
+            if (resp.ok) {
+                alert('Repository deleted successfully!');
+                location.reload();
+            } else {
+                alert('Something went wrong!');
+            }
+        });
+    }
+}
+

@@ -61,6 +61,15 @@ public class DashboardController {
     }
 
 
+
+    @GetMapping("/deleteRepo/{name}")
+    public ResponseEntity<?> deleteRepository(@PathVariable String name) {
+        svnRepo.deleteByRepoName(name);
+        return ResponseEntity.ok().build(); // Redirect to list page after deletion
+    }
+
+
+
     private Page<CommitEntry> getPaginatedCommits(List<CommitEntry> allCommits, int page, int size) {
         int total = allCommits.size();
         int start = Math.min(page * size, total);

@@ -18,7 +18,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
   <div class="container">
     <a class="navbar-brand" href="#">SVN Dashboard</a>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRepoModal">
+    <button onclick="openModal()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRepoModal">
       <i class="fas fa-plus me-2"></i>Add Repository
     </button>
   </div>
@@ -33,8 +33,10 @@
           <h5 class="card-title text-truncate" th:text="${repo.name}"></h5>
           <p class="card-text text-muted small" th:text="${repo.url}"></p>
         </div>
-        <div class="card-footer bg-transparent">
+        <div class="card-footer bg-transparent row row-cols-md-31 row-cols-lg-2">
           <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
+          <a href="#"   th:attr="data-repo-name=${repo.name}"
+             onclick="deleteRepository(this)" class="btn btn-outline-danger btn-sm">Delete</a>
         </div>
       </div>
     </div>
