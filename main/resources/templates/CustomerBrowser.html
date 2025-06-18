@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart and Table</title>
+<!--    <script th:src="@{/scripts/showModalDialogChrome.js}"></script>-->
+<!--    <script th:src="@{/scripts/common_mb.js}"></script>-->
+<!--    <script th:src="@{/scripts/HTTPValidator_mb.js}"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        html, body {
+            min-height: 100%;
+        }
+
+        body, div, form, p {
+            padding: 0;
+            margin: 0;
+            outline: none;
+            font-family: Roboto, Arial, sans-serif;
+            font-size: 14px;
+            color: #f2f2f2;
+        }
+        .box{
+            display: flex;
+            gap: 40%;
+        }
+
+        .box select {
+            background-color: #0563af;
+            color: white;
+            padding: 12px;
+            width: 250px;
+            border: none;
+            border-radius:20%;
+            font-size: 17px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            -webkit-appearance: button;
+            appearance: auto;
+            outline: none;
+        }
+
+        .box select option {
+            padding: 30px;
+        }
+
+        input {
+            height: 30px;
+            width: 280px;
+            border: 1px solid #c0c0c0;
+            border-radius: 4px;
+            box-sizing: border-box;
+            padding: 16px;
+        }
+
+        h2 {
+            margin: 0;
+            font-weight: 400;
+        }
+
+        h3 {
+            margin: 12px 0;
+            color: #f2f2f2;
+        }
+
+        .main-block {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+        }
+
+        form {
+            width: 100%;
+            padding: 20px;
+        }
+
+        fieldset {
+            border-radius:10%;
+            width:80%;
+            margin: 10px 8%;
+        }
+
+        canvas{
+            color: white;
+        }
+
+        @import 'https://fonts.googleapis.com/css?family=Open+Sans:600,700';
+
+        * {
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .rwd-table {
+            margin: auto;
+            width: 70%;
+            border-collapse: collapse;
+        }
+
+        .rwd-table tr:first-child {
+            border-top: none;
+            background: #428bca;
+            color: #fff;
+        }
+
+        .rwd-table tr {
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            background-color: #f5f9fc;
+        }
+
+        .rwd-table tr:nth-child(odd):not (:first-child )  {
+            background-color: #ebf3f9;
+        }
+
+        .rwd-table th {
+            display: none;
+        }
+
+        .rwd-table td {
+            display: block;
+        }
+
+        .rwd-table td:first-child {
+            margin-top: .5em;
+        }
+
+        .rwd-table td:last-child {
+            margin-bottom: .5em;
+        }
+
+        .rwd-table td:before {
+            content: attr(data-th) ": ";
+            font-weight: bold;
+            width: 120px;
+            display: inline-block;
+            color: #000;
+        }
+
+        .rwd-table th, .rwd-table td {
+            text-align: center;
+            word-wrap: break-word;
+        }
+
+        .rwd-table {
+            color: #333;
+            border-radius: .4em;
+            overflow: hidden;
+        }
+
+        .rwd-table tr {
+            border-color: #bfbfbf;
+            height:38px;
+            font-size:10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rwd-table tr:hover {
+            cursor: pointer;
+            background-color: #cccfe3;
+            color: black;
+            border: 1px solid black;
+        }
+
+        .rwd-table th, .rwd-table td {
+            padding: .5em 1em;
+        }
+
+        @media screen and (max-width: 601px) {
+            .rwd-table tr:nth-child(2) {
+                border-top: none;
+            }
+        }
+
+        @media screen and (min-width: 600px) {
+            .rwd-table tr:hover:not (:first-child ) {
+                background-color: #d8e7f3;
+            }
+            .rwd-table td:before {
+                display: none;
+            }
+            .rwd-table th, .rwd-table td {
+                display: table-cell;
+                padding: .25em .5em;
+            }
+            .rwd-table th:first-child, .rwd-table td:first-child {
+                padding-left: 0;
+            }
+            .rwd-table th:last-child, .rwd-table td:last-child {
+                padding-right: 0;
+            }
+            .rwd-table th, .rwd-table td {
+                padding: 1em !important;
+            }
+        }
+
+        body {
+            background: #4B79A1;
+            background: -webkit-linear-gradient(to left, #4B79A1, #283E51);
+            background: linear-gradient(to left, #4B79A1, #283E51);
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 2.4em;
+            color: #f2f2f2;
+        }
+
+        .container {
+            display: block;
+            text-align: center;
+        }
+
+        @-webkit-keyframes leftRight { 0% {
+            -webkit-transform: translateX(0)
+        }
+            25%
+            {
+                -webkit-transform: translateX(-10px)
+            }
+            75%
+            {
+                -webkit-transform: translateX(10px)
+            }
+            100%
+            {
+                -webkit-transform: translateX(0)
+            }
+        }
+        @keyframes leftRight { 0% {
+            transform: translateX(0)
+        }
+            25%
+            {
+                transform: translateX(-10px)
+            }
+            75%
+            {
+                transform: translateX(10px)
+            }
+            100%
+            {
+                transform: translateX(0)
+            }
+        }
+
+        #spinnerWrapper {
+            position: relative;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        #spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #spinnerText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            color: #3498db;
+            font-weight: bold;
+        }
+        #timeDisplay {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #rfsbtn {
+            background: linear-gradient(45deg, #290bbf, #290bbf);
+            border: none;
+            color: white;
+            padding: 12px 12px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.5);
+        }
+
+        #rfsbtn:hover {
+            background: linear-gradient(45deg, #290bbf, #290bbf);
+            box-shadow: 0 6px 20px rgba(255, 65, 108, 0.7);
+            transform: scale(1.05);
+        }
+
+        #rfsbtn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-box {
+            display: inline-block;
+            padding: 12px 28px;
+            background: #c8cecf;
+            border-radius: 40px;
+            font-size: 16px;
+            color: #081b29;
+            letter-spacing: 1px;
+            text-decoration: none;
+            font-weight: 600;
+            opacity: 0;
+            animation: slideTop 1s ease forwards;
+            animation-delay: 2s;
+            box-shadow: 0 0 2px #c8cecf, 0 0 25px #c8cecf
+        }
+
+        .btn-box:hover {
+            text-decoration: none;
+            box-shadow: 0 0 5px #c8cecf, 0 0 25px #c8cecf, 0 0 50px #c8cecf, 0 0 100px #c8cecf, 0 0 200px #c8cecf
+        }
+
+        @keyframes slideTop {
+            0% {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0px);
+                opacity: 1;
+            }
+        }
+
+        .info {
+            text-align:center;
+        }
+
+        .pages {
+            margin: 1% 8%;
+        }
+
+        .pages ul {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: baseline;
+            justify-content: flex-end;
+        }
+
+        .pages ul li {
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .pages ul li button {
+            color: whitesmoke;
+            width: 100%;
+            box-sizing: border-box;
+            border: 0;
+            border-radius: 20%;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .pages ul li button:hover {
+            background: #4B79A1;
+            color: white;
+            font-size: 16px;
+            z-index: 2;
+        }
+
+        .pages ul li span.active {
+            background-color: #4B79A1;
+            color: white;
+            border-radius: 20%;
+        }
+
+        .pages ul li button, .pages ul li span {
+            padding: 2px;
+        }
+    </style>
+    <script type="text/javascript">
+        var NAME_XML="";
+        var mobile = gid("mobile");
+        var pidtype = gid("pidtype");
+        var pidno = gid("pidno");
+        var xmlstring ="";
+        var _reportSl=0;
+        var _strtSl=0;
+        var _endSl=0;
+        var _nextRecAvl=0;
+        var _keyCode ="";
+        var objXMLApplet = new xmlHTTPValidator();
+        var totoalCount=0;
+        var exctime =0;
+        var page=1;
+        var cntxml ="";
+        var chartopen = false;
+        var chartcreate = false;
+        var lastpageno=0;
+        var chartalreadyuse = false;
+        var allxml="";
+
+        var inputElement;
+
+        var gid = function(id) {
+            return document.getElementById(id);
+        }
+
+        function checkEnter(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                allxml ="";
+                cntxml ="";
+                _reportSl = 1;
+                fetchgriddetails(1,10);
+                chartopen = false;
+                chartcreate = false;
+
+                gid('chart').style.display = 'none';
+                gid('firstpage').classList.add("active");
+                if(gid('chartbtntext').innerHTML == "Hide Chart"){
+                    gid('chartbtntext').innerHTML = "View Chart";
+                }
+            }
+        }
+
+        function onclksrch(event){
+            event.preventDefault();
+            allxml ="";
+            cntxml ="";
+            _reportSl = 1;
+            fetchgriddetails(1,10);
+            chartopen = false;
+            chartcreate = false;
+
+            gid('chart').style.display = 'none';
+            gid('firstpage').classList.add("active");
+            if(gid('chartbtntext').innerHTML == "Hide Chart"){
+                gid('chartbtntext').innerHTML = "View Chart";
+            }
+        }
+
+        function fetchgriddetails(_strtSl, _endSl) {
+            NAME_XML = gid("input1").value;
+            objXMLApplet.clearMap();
+            objXMLApplet.setValue("Package", "panacea.CMaction.qcustbrowserval");
+            objXMLApplet.setValue("Method", "fetchGridfornamefq");
+            objXMLApplet.setValue("ValidateToken", "true");
+            objXMLApplet.setValue("NAME_XML", NAME_XML);
+            objXMLApplet.setValue("KEY_CODE", _keyCode);
+            objXMLApplet.setValue("REPORT_SL", _reportSl);
+            objXMLApplet.setValue("START_SL", _strtSl);
+            objXMLApplet.setValue("END_SL", _endSl);
+            objXMLApplet.sendAndReceive();
+
+
+            if (objXMLApplet.getValue("Result") == "RowPresent") {
+                xmlstring = objXMLApplet.getValue("XML_STR");
+                loadTable(xmlstring);
+                _reportSl = objXMLApplet.getValue("REPORT_SL");
+                _strtSl = objXMLApplet.getValue("START_SL");
+                _endSl = objXMLApplet.getValue("END_SL");
+                _nextRecAvl = objXMLApplet.getValue("NEXT_REC_AVL");
+                totalCount = objXMLApplet.getValue("TOTALCNT");
+                exctime = objXMLApplet.getValue("EXTIME");
+
+                if(totalCount%10 == 0){
+                    lastpageno = parseInt((totalCount/10));
+                }else{
+                    lastpageno = parseInt((totalCount/10)+1);
+                }
+
+                gid('lastpage').innerHTML = lastpageno;
+
+                gid('pages').style.visibility = 'visible';
+                gid('info').style.visibility = 'visible';
+                performSearch();
+                gid('chartbtn').style.visibility ='visible';
+                gid('pdfbtn').style.visibility ='visible';
+            }
+        }
+
+        function forallxml(){
+            NAME_XML = gid("input1").value;
+            if(allxml == ""){
+                objXMLApplet.clearMap();
+                objXMLApplet.setValue("Package", "panacea.CMaction.qcustbrowserval");
+                objXMLApplet.setValue("Method", "fetchalldata");
+                objXMLApplet.setValue("ValidateToken", "true");
+                objXMLApplet.setValue("NAME_XML", NAME_XML);
+                objXMLApplet.sendAndReceive();
+
+                if (objXMLApplet.getValue("Result") == "RowPresent") {
+                    allxml = objXMLApplet.getValue("ALLXML");
+                }
+            }
+        }
+
+        function forloadxml(){
+            NAME_XML = gid("input1").value;
+            if(cntxml == ""){
+                objXMLApplet.clearMap();
+                objXMLApplet.setValue("Package", "panacea.CMaction.qcustbrowserval");
+                objXMLApplet.setValue("Method", "fetchbrnCount");
+                objXMLApplet.setValue("ValidateToken", "true");
+                objXMLApplet.setValue("NAME_XML", NAME_XML);
+                objXMLApplet.sendAndReceive();
+
+                if (objXMLApplet.getValue("Result") == "RowPresent") {
+                    cntxml = objXMLApplet.getValue("CNTXML");
+                    console.log(cntxml);
+                }
+            }
+        }
+
+        function loadTable(xmlString) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+            const records = xmlDoc.getElementsByTagName("Record");
+
+            const tableBody = document.querySelector("tbody");
+            tableBody.innerHTML = '<tr><th>Serial No</th> <th>Customer Number</th> <th>Customer Name</th> <th>Father Name</th> <th>A/C Number</th> <th>Telephone/Mobile no</th> <th>Home Branch</th> <th>TIN no</th> <th>Address</th> </tr>';
+
+            Array.from(records).forEach(record => {
+                const row = document.createElement("tr");
+
+                const cells = record.getElementsByTagName("Cell");
+                Array.from(cells).forEach((cell, index) => {
+                    if (index !== 7) {
+                        const td = document.createElement("td");
+                        td.textContent = cell.textContent || "";
+                        row.appendChild(td);
+                    }
+                });
+
+                tableBody.appendChild(row);
+            });
+            gid('searchdiv').style.display='block';
+        }
+
+        function retnpage(fldobj){
+            _reportSl=0;
+            var num = parseInt(fldobj.innerHTML);
+            page = num;
+            var mnum = num -1;
+
+            if(fldobj.id == 'lastpage'){
+                if(totalCount%10==0){
+                    var tmp = parseInt(totalCount/10)-1;
+                    fetchgriddetails(tmp*10+1,totalCount);
+                }else{
+                    var tmp = parseInt(totalCount/10);
+                    fetchgriddetails(tmp*10+1,totalCount);
+                }
+                gid('firstpage').innerHTML = num-4;
+                gid('secondpage').innerHTML = num-3;
+                gid('thirdpage').innerHTML = num-2;
+                gid('fourthpage').innerHTML = num-1;
+
+                return;
+            }
+            else if(fldobj.id == 'fourthpage'){
+                gid('firstpage').innerHTML = num;
+                gid('secondpage').innerHTML = num+1;
+                gid('thirdpage').innerHTML = num+2;
+                gid('fourthpage').innerHTML = num+3;
+                fetchgriddetails(mnum*10+1, num*10);
+                return;
+            }
+            fetchgriddetails(mnum*10+1, num*10);
+            return;
+        }
+
+        function leftpage(){
+            if(page==1){
+                return;
+            }
+            page = page-1;
+            fetchgriddetails((page-1)*10+1, page*10);
+            gid('firstpage').innerHTML = page;
+            gid('secondpage').innerHTML = page+1;
+            gid('thirdpage').innerHTML = page+2;
+            gid('fourthpage').innerHTML = page+3;
+            return;
+        }
+
+        function rightpage(){
+            if(page == lastpageno){
+                return;
+            }
+            page = page+1;
+            fetchgriddetails((page-1)*10+1, page*10);
+            gid('firstpage').innerHTML = page;
+            gid('secondpage').innerHTML = page+1;
+            gid('thirdpage').innerHTML = page+2;
+            gid('fourthpage').innerHTML = page+3;
+            return;
+        }
+
+        function onclkchartbtn(){
+            if(chartopen == false){
+                gid('chart').style.display ='flex';
+                gid('chart').style.justifyContent ='center';
+                forloadxml();
+                if(chartcreate == false){
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(cntxml, "application/xml");
+
+                    const records = xmlDoc.getElementsByTagName("record");
+
+                    let labels = [];
+                    let data = [];
+
+                    for (let i = 0; i < records.length; i++) {
+                        const label = records[i].getElementsByTagName("label")[0].textContent;
+                        const value = parseInt(records[i].getElementsByTagName("data")[0].textContent, 10);
+
+                        if (value !== 0) {
+                            labels.push(label);
+                            data.push(value);
+                        }
+                    }
+                    if(chartalreadyuse == false){
+                        const ctx = document.getElementById('lineChart').getContext('2d');
+
+                        const lineChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Count',
+                                    data: data,
+                                    borderColor: 'white',
+                                    borderWidth: 2,
+                                    fill: false,
+                                    pointRadius: 3,
+                                    pointHoverRadius: 8,
+                                    hitRadius: 10,
+                                    backgroundColor: 'white',
+                                    pointBackgroundColor: 'blue',
+                                    pointHoverBackgroundColor: 'red'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Branch Code',
+                                            color: 'white'
+                                        },
+                                        ticks: {
+                                            color: 'white',
+                                            maxRotation: 45,
+                                            minRotation: 45,
+                                            autoSkip: true,
+                                            maxTicksLimit: 20
+                                        },
+                                        grid: {
+                                            color: 'rgba(255, 99, 132, 0.5)'
+                                        }
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Count',
+                                            color: 'white'
+                                        },
+                                        ticks: {
+                                            color: 'white'
+                                        },
+                                        grid: {
+                                            color: 'rgba(54, 162, 235, 0.5)'
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        intersect: false,
+                                        mode: 'nearest',
+                                        position: 'nearest',
+                                        callbacks: {
+                                            label: function(tooltipItem) {
+                                                const label = tooltipItem.label;
+                                                const value = tooltipItem.raw;
+                                                return value;
+                                            }
+                                        }
+                                    }
+                                },
+                                onClick: function(event) {
+                                    const elements = this.getElementsAtEventForMode(event, 'nearest', { intersect: false });
+                                    if (elements.length > 0) {
+                                        const firstElement = elements[0];
+                                        const datasetIndex = firstElement.datasetIndex;
+                                        const index = firstElement.index;
+                                        const label = this.data.labels[index];
+                                        const value = this.data.datasets[datasetIndex].data[index];
+
+                                        var rt = showModalDialog_CBC(
+                                            "CM/searchnamefqmodal.faces?name=" + NAME_XML + "&brncode=" + label + "&totalcnt=" + value,
+                                            "",
+                                            "dialogHeight:400px; dialogWidth:800px; positio:fixed; title=no; status=no;help=no;");
+                                    }
+                                }
+                            }
+                        });
+                        chartalreadyuse = true;
+                    }
+                    chartcreate = true;
+                }
+                gid('chartbtntext').innerHTML = "Hide Chart";
+                chartopen = true;
+            }
+            else{
+                gid('chart').style.display ='none';
+                gid('chartbtntext').innerHTML = "View Chart";
+                chartopen = false;
+            }
+        }
+
+        function loadTable1(xmlString) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+            const records = xmlDoc.getElementsByTagName("Record");
+
+            const tableBody = document.querySelector("tbody");
+            tableBody.innerHTML = '';
+            tableBody.innerHTML = '<tr><th>Serial No</th> <th>Customer Number</th> <th>Customer Name</th> <th>Father Name</th> <th>A/C Number</th> <th>Telephone/Mobile no</th> <th>Home Branch</th> <th>TIN no</th> <th>Address</th></tr>';
+
+            Array.from(records).forEach(record => {
+                const row = document.createElement("tr");
+
+                const cells = record.getElementsByTagName("Cell");
+                Array.from(cells).forEach((cell, index) => {
+                    if (index !== 7) {
+                        const td = document.createElement("td");
+                        td.textContent = cell.textContent || "";
+                        row.appendChild(td);
+                    }
+                });
+
+                tableBody.appendChild(row);
+            });
+            gid('pages').style.visibility = 'hidden';
+            gid('info').style.visibility = 'visible';
+        }
+
+        function searchDataf(){
+            const input = document.getElementById('searchInput').value;
+            if(input.length >= 2){
+                searchData();
+            }else if(input.length==''){
+                fetchgriddetails(1,10);
+            }
+        }
+
+        function searchData() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const parser = new DOMParser();
+            const allxmldoc = parser.parseFromString(allxml, 'text/xml');
+            const records = allxmldoc.querySelectorAll('Record');
+            const newXML = document.implementation.createDocument('', '', null);
+            const newData = newXML.createElement('Data');
+            newXML.appendChild(newData);
+
+            records.forEach(record => {
+                const cells = record.querySelectorAll('Cell');
+                let match = false;
+
+                cells.forEach(cell => {
+                    if (cell.textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                    }
+                });
+
+                if (match) {
+                    const clonedRecord = record.cloneNode(true);
+                    newData.appendChild(clonedRecord);
+                }
+            });
+
+            const serializer = new XMLSerializer();
+            const xmlString = serializer.serializeToString(newXML);
+            console.log(xmlString);
+            loadTable1(xmlString);
+            gid('pages').style.visibility = 'hidden';
+            gid('info').style.visibility = 'visible';
+        }
+
+        function onclkpdfbtn() {
+            forallxml();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(allxml, "application/xml");
+
+            const records = xmlDoc.getElementsByTagName("Record");
+
+            let csvData = "ID,Code,Name,FathersName,AccountNumber,MobileNumber,BranchCode,CustomerType,TIN,Address\n";
+
+            for (let record of records) {
+                const cells = record.getElementsByTagName("Cell");
+
+                const id = cells[0].textContent;
+                const code = cells[1].textContent;
+                const name = cells[2].textContent;
+                const fatherName = cells[3].textContent;
+                const accno = cells[4].textContent;
+                const phone2 = cells[5].textContent;
+                const postCode = cells[6].textContent;
+                const status = cells[7].textContent;
+                const emptyField = cells[8].textContent;
+                const address = cells[9].textContent;
+
+                csvData += '"' + id + '","' + code + '","' + name + '","' + fatherName + '","' + accno + '","' + phone2 + '","' + postCode + '","' + status + '","' + emptyField + '","' + address + '"\n';
+            }
+
+            const blob = new Blob([csvData], { type: "text/csv" });
+
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "All_" + NAME_XML.toUpperCase() + "_Customers.csv";
+            link.click();
+        }
+
+        function performSearch() {
+            resetSpinner();
+            startTimer();
+
+            const input = document.getElementById("input1");
+            let filter = input.value.trim().toLowerCase();
+            filter = filter.replace(/\s+/g, ' ');
+
+            setTimeout(() => {
+                stopSpinner(exctime);
+                document.getElementById("timeDisplay").textContent = 'Time: '+ exctime +' ms | Data Count: '+ totalCount;
+            }, 1);
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            document.getElementById("spinner").style.display = "inline-block";
+            document.getElementById("spinnerText").style.display = "inline-block";
+            timerInterval = setInterval(() => {
+                document.getElementById("spinnerText").textContent = exctime+' ms';
+                document.getElementById("timeDisplay").textContent = 'Time: '+exctime+' ms | Data Count: 0';
+            }, 1);
+        }
+
+        function stopSpinner(finalElapsed) {
+            clearInterval(timerInterval);
+            document.getElementById("spinnerText").textContent = exctime+' ms';
+            document.getElementById("timeDisplay").textContent = 'Time: '+ exctime +' ms | Data Count: '+ totalCount;
+            document.getElementById("spinner").style.animation = "none";
+        }
+
+        function resetSpinner() {
+            document.getElementById("spinner").style.animation = "spin 2s linear infinite";
+        }
+    </script>
+</head>
+<body>
+<h2>Search For Customer Details</h2>
+<fieldset>
+    <legend>
+        <h3>Enter Customer Name</h3>
+    </legend>
+    <form>
+        <div class="box">
+
+            <div id="name">
+                <input type="text" id="input1" name="name" placeholder="Enter Customer Name" onkeypress="checkEnter(event)">
+<!--                <span onclick="onclksrch(event)"><button id="rfsbtn">Search🔍</button></span>-->
+            </div>
+
+            <div id= "info" class="info" style="visibility: hidden;">
+
+
+                <div id="timeDisplay">Time: 0 ms | Data Count: 0</div>
+                <div id="spinnerWrapper">
+                    <div id="spinner"></div>
+                    <div id="spinnerText">0 ms</div>
+                </div>
+
+            </div>
+
+        </div>
+    </form>
+</fieldset>
+
+<div class="container">
+    <div id="searchdiv" style="padding-left:45%; display:none;"><input type="text" id="searchInput" placeholder="Search data..." onfocus="forallxml()" onkeyup="searchDataf()"><span onclick="fetchgriddetails(1,10)"><button id="rfsbtn">Refresh🔄</button></span></div>
+    <table class="rwd-table">
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+
+
+<div class="pages" id="pages" style="visibility: hidden;">
+
+    <ul>
+        <li><button id ="firstpage" onclick="retnpage(this)">1</button></li>
+        <li><button id="secondpage" onclick="retnpage(this)">2</button></li>
+        <li><button id ="thirdpage" onclick="retnpage(this)">3</button></li>
+        <li><button id="fourthpage" onclick="retnpage(this)">4</button></li>
+        <li><span>...</span></li>
+        <li><button id="lastpage" onclick="retnpage(this)"></button></li>
+        <li><button id="leftpage" onclick="leftpage()"> < </button></li>
+        <li><button id="rightpage" onclick="rightpage()"> > </button></li>
+    </ul>
+</div>
+
+
+
+<div id="chart" style="display:none; padding: 2%;  margin:5%;  border: 1px gray solid; border-radius:5%;"> <canvas id="lineChart"></canvas> </div>
+
+<div id="chartbtn" style="visibility: hidden; text-align: center;">
+    <button id="chartbtntext" onclick="onclkchartbtn()" class="btn-box">View Chart</button>
+</div>
+<div id="pdfbtn" style="visibility: hidden; margin-top: 3%; text-align: center;">
+    <button href="" onclick="onclkpdfbtn()" class="btn-box">Download CSV</button>
+</div>
+
+</body>
+</html>
