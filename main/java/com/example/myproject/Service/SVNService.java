@@ -12,10 +12,13 @@ import org.tmatesoft.svn.core.*;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.SVNDiffClient;
 import org.tmatesoft.svn.core.wc.SVNLogClient;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
+import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,14 +56,21 @@ public class SVNService {
         }
     }
 
-    public List<CommitEntry> getCommitHistory(String repoUrl, String path) throws SVNException {
+    public List<CommitEntry> getCommitHistory(String repoUrl, String path, LocalDate fromD, LocalDate toD) throws SVNException {
         List<CommitEntry> entries = new ArrayList<>();
         SVNLogClient logClient = new SVNLogClient(
                 repositories.get(repoUrl).getAuthenticationManager(), null);
-
-        logClient.doLog(SVNURL.parseURIEncoded(repoUrl),
-                new String[]{path}, SVNRevision.HEAD, SVNRevision.create(0),
-                SVNRevision.HEAD, false, true, 0,
+        Date from = java.sql.Date.valueOf(fromD);
+        Date to = java.sql.Date.valueOf(toD.plusDays(1));
+        logClient.doLog(
+                SVNURL.parseURIEncoded(repoUrl),
+                new String[]{path},
+                SVNRevision.HEAD,
+                SVNRevision.create(from),
+                SVNRevision.create(to),
+                false,
+                true,
+                0,
                 new ISVNLogEntryHandler() {
                     @Override
                     public void handleLogEntry(SVNLogEntry logEntry) {
@@ -112,7 +122,7 @@ public class SVNService {
         }
     }
 
-    public List<CommitEntry> getAllCommits() {
+    public List<CommitEntry> getAllCommits(LocalDate from, LocalDate to) {
         try {
             init();
         } catch (SVNException e) {
@@ -121,7 +131,7 @@ public class SVNService {
         return repoList.stream()
                 .flatMap(repo -> {
                     try {
-                        return getCommitHistory(repo.getUrl(), "").stream();
+                        return getCommitHistory(repo.getUrl(), "", from, to).stream();
                     } catch (SVNException e) {
                         throw new RuntimeException(e);
                     }
@@ -157,6 +167,31 @@ public class SVNService {
                 .collect(Collectors.toList()));
 
         return chartData;
+    }
+
+
+
+    public String getDiffBetweenRevisions(String repoUrl, long rev) throws SVNException {
+        String reponame = repoUrl.split("/")[2];
+        SvnRepository svnRepository = svnRepo.findByReponame("%"+reponame+"%");
+        String mergedUrl = svnRepository.getRepo_url() + repoUrl.replaceFirst("^/branches/"+reponame, "");
+        SVNRepository repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(mergedUrl));
+        ByteArrayOutputStream diffOutput = new ByteArrayOutputStream();
+        ISVNAuthenticationManager authManager =
+                SVNWCUtil.createDefaultAuthenticationManager(
+                        svnRepository.getUsername(), svnRepository.getPassword());
+        SVNDiffClient diffClient = new SVNDiffClient(authManager, null);
+        diffClient.doDiff(
+                SVNURL.parseURIEncoded(mergedUrl),
+                SVNRevision.HEAD,             // Peg revision (usually HEAD or rev2)
+                SVNRevision.create(rev-1),     // Start
+                SVNRevision.create(rev),     // End
+                SVNDepth.INFINITY,
+                true,
+                diffOutput
+        );
+
+        return diffOutput.toString();
     }
 }
 

@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.tmatesoft.svn.core.SVNException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,12 +30,21 @@ public class RepoController {
                              @RequestParam(defaultValue = "") String path,
                              Model model,
                              @RequestParam(defaultValue = "0") int page,
-                             @RequestParam(defaultValue = "10") int size) {
+                             @RequestParam(defaultValue = "10") int size,
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+
+        if (from == null) {
+            from = LocalDate.now().withDayOfYear(1); // First day of current year
+        }
+        if (to == null) {
+            to = LocalDate.now(); // Today
+        }
 
         Repository repo = svnService.getRepository(repoName);
         List<CommitEntry> commits = null;
         try {
-            commits = svnService.getCommitHistory(repo.getUrl(), path);
+            commits = svnService.getCommitHistory(repo.getUrl(), path, from, to);
         } catch (SVNException e) {
             throw new RuntimeException(e);
         }

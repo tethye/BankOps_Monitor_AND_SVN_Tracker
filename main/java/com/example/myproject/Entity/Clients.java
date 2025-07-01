@@ -92,7 +92,7 @@ import jakarta.persistence.*;
                 "ORDER BY cnt DESC",
         resultSetMapping = "BranchwiseDTOMapping"
 )
-
+@Table(name="CLIENTSNAME")
 public class Clients {
     @Id
     Long Clients_code;

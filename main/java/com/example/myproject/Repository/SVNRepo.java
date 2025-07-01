@@ -13,4 +13,6 @@ public interface SVNRepo extends JpaRepository<SvnRepository, Integer> {
     @Transactional
     @Query(value = "delete from SVNREPOSITORY where repo_name=?", nativeQuery = true)
     void deleteByRepoName(String repoName);
+    @Query(value = "select * from svnrepository WHERE REPO_URL like ?", nativeQuery = true)
+    SvnRepository findByReponame(String reponame);
 }

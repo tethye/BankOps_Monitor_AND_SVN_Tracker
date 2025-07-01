@@ -1,18 +1,3 @@
-// // Chart Initialization
-// function initCommitChart(data) {
-//     new Chart(document.getElementById('commitChart'), {
-//         type: 'bar',
-//         data: {
-//             labels: data.users,
-//             datasets: [{
-//                 label: 'Commits',
-//                 data: data.counts
-//             }]
-//         }
-//     });
-// }
-
-
 function initCommitChart(chartData) {
     const ctx = document.getElementById('commitChart').getContext('2d');
     new Chart(ctx, {
@@ -112,8 +97,11 @@ function renderTree(items) {
 
     function closeModal() {
     document.getElementById('repoModal').style.display = 'none';
-
-}
+        const modalStyle = document.getElementById("modalStyle");
+        if (modalStyle) {
+            modalStyle.remove();
+        }
+    }
 function deleteRepository(element) {
     const name = element.getAttribute("data-repo-name");
     if (confirm("Are you sure you want to delete?")) {
@@ -130,3 +118,80 @@ function deleteRepository(element) {
     }
 }
 
+
+function openChangedFiles(changedFiles, rev) {
+    document.getElementById("changefile").style.display = 'block';
+    const container = document.getElementById('modal-body');
+    container.innerHTML = '';
+    const files = changedFiles.split(',');
+    files.forEach(file => {
+        const fileItem = document.createElement("p");
+        fileItem.textContent = file.trim();
+        fileItem.style.cursor = "pointer";
+        fileItem.style.padding = "4px 0";
+        fileItem.style.borderBottom = "1px solid #ccc";
+
+        // Add click handler to open second modal
+        fileItem.addEventListener("click", () => {
+            openFileDetailModal(file.trim(), rev);
+        });
+
+        container.appendChild(fileItem);
+    });
+
+}
+
+function openFileDetailModal(file, rev) {
+    const url = `/svn-dashboard/diff-viewer?repoUrl=${encodeURIComponent(file)}&rev=${rev}`;
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text(); // HTML page response
+        })
+        .then(html => {
+            // Open the HTML in a modal OR navigate to a new page
+            const newWindow = window.open();
+            newWindow.document.write(html);
+            newWindow.document.close();
+        })
+        .catch(error => {
+            console.error('Error fetching diff:', error);
+            alert('Could not load diff page.');
+        });
+}
+
+function closechangedfile()  {
+    document.getElementById("changefile").style.display = 'none';
+}
+
+
+function authorKeypress(fldobj, event){
+    if (event.key === "Enter") {
+        event.preventDefault(); // Prevent form submission (if any)
+
+        const authorName = fldobj.value;
+
+        // Perform AJAX GET request
+        fetch(`/svn-dashboard?authorname=${encodeURIComponent(authorName)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                    console.log('Error fetching diff:', response.text());
+                }
+                return response.text();// or .json() if expecting JSON
+            })
+            .then(data => {
+                // Handle response: update DOM, display results, etc.
+                console.log("Success:", data);
+                // For example:
+                // document.getElementById("results").innerHTML = data;
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+                console.log("Error fetching data:", error);
+            });
+    }
+}
