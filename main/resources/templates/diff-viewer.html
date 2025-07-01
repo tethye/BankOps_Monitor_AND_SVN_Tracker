@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Diff Viewer</title>
+    <!-- Diff2HTML CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css" rel="stylesheet">
+    <style>
+        .d2h-file-wrapper { border-radius: 3px; margin-bottom: 1em; }
+        .d2h-code-line { font-family: monospace; font-size: 14px; }
+        .d2h-file-header { padding: 10px; background-color: #f6f8fa; }
+    </style>
+</head>
+<body>
+<h1>Diff:
+    <span th:text="${filename}">HTTPValEOD_mb.js</span>
+    (<span th:text="${rev}-1"></span> vs  <span th:text="${rev}"></span>)
+</h1>
+
+<div id="diff-container"></div>
+
+<!-- Required Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/diff2html@3.4.13/bundles/js/diff2html-ui.min.js"></script>
+
+<script>
+    // Get base64-encoded diff from server
+    const encodedDiff = "[[${encodedDiff}]]";
+    // Decode diff
+    const rawDiff = atob(encodedDiff);
+
+    // Render diff
+    const diffContainer = document.getElementById('diff-container');
+    const configuration = {
+        drawFileList: false,
+        matching: 'lines',
+        outputFormat: 'side-by-side',
+        synchronisedScroll: true,
+        highlight: true
+    };
+
+    const diff2htmlUi = new Diff2HtmlUI(diffContainer, rawDiff, configuration);
+    diff2htmlUi.draw();
+    diff2htmlUi.highlightCode();
+</script>
+</body>
+</html>
